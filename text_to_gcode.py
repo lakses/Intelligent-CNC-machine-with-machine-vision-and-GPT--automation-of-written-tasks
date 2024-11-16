@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-#pylint: disable=no-member
-
 from enum import Enum
 import os
 import math
@@ -87,15 +84,15 @@ def parseArgs(namespace):
 		description="Compiles text into 2D gcode for plotters")
 
 	argParser.add_argument_group("Data options")
-	argParser.add_argument("-i", "--input", type=argparse.FileType('r'), default="-", metavar="FILE",
+	argParser.add_argument("-i", "--input", type=argparse.FileType('r'), default="input.txt", metavar="FILE",
 		help="File to read characters from")
-	argParser.add_argument("-o", "--output", type=argparse.FileType('w'), required=True, metavar="FILE",
+	argParser.add_argument("-o", "--output", type=argparse.FileType('w'), metavar="FILE", default="out.gcode",
 		help="File in which to save the gcode result")
 	argParser.add_argument("-g", "--gcode-directory", type=str, default="./ascii_gcode/", metavar="DIR",
 		help="Directory containing the gcode information for all used characters")
 
 	argParser.add_argument_group("Text options")
-	argParser.add_argument("-l", "--line-length", type=float, required=True,
+	argParser.add_argument("-l", "--line-length", type=float, default = 300,
 		help="Maximum length of a line")
 	argParser.add_argument("-s", "--line-spacing", type=float, default=8.0,
 		help="Distance between two subsequent lines")
