@@ -2,6 +2,7 @@ from enum import Enum
 import os
 import math
 import argparse
+import time
 
 class Instr:
 	class Type(Enum):
@@ -24,7 +25,7 @@ class Instr:
 		return "G%d X%.2f Y%.2f" % (self.type.value[0], self.x, self.y)
 
 	def translated(self, x, y):
-		return Instr(self.type, self.x + x, self.y + y)
+		return Instr(self.type, self.x + x, self.y + y + 200)
 
 class Letter:
 	def __init__(self, *args):
@@ -33,6 +34,7 @@ class Letter:
 			for line in args[0].split('\n'):
 				if line != "":
 					self.instructions.append(Instr(line))
+				
 
 			pointsOnX = [instr.x for instr in self.instructions]
 			self.width = max(pointsOnX) - min(pointsOnX)
@@ -62,21 +64,48 @@ def readLetters(directory):
 			letters[letterRepr] = letter
 	return letters
 
+
+
 def textToGcode(letters, text, lineLength, lineSpacing, padding):
-	# used for fast string concatenation
-	gcodeLettersArray = []
+    # используем для быстрой конкатенации строк
+    gcodeLettersArray = []
 
-	offsetX, offsetY = 0, 0
-	for char in text:
-		letter = letters[char].translated(offsetX, offsetY)
-		gcodeLettersArray.append(repr(letter))
+    # Опускаем ось Z на 0 в начале печати
+    gcodeLettersArray.append("G0 Z0")  # Опускание Z в начале
 
-		offsetX += letter.width + padding
-		if offsetX >= lineLength:
-			offsetX = 0
-			offsetY -= lineSpacing
+    offsetX, offsetY = 0, 0
+    for char in text:
+        # Если встречаем пробел, поднимем ось Z
+        if char == " ":
+            gcodeLettersArray.append("G0 Z10 ")  # Поднятие Z (вверх)
 
-	return "".join(gcodeLettersArray)
+        letter = letters[char].translated(offsetX, offsetY)
+        gcodeLettersArray.append(repr(letter))
+
+        # Если был пробел, опустим ось Z
+        if char == " ":
+            gcodeLettersArray.append("G0 Z0")  # Опускание Z (вниз)
+
+        offsetX += letter.width + padding
+        if offsetX >= lineLength:
+            # Поднимем ось Z дважды перед переходом на новую строку
+            gcodeLettersArray.append("\nG0 Z10")  # Поднимем ось Z
+            gcodeLettersArray.append("\nG0 Z10")  # Поднимем ось Z еще раз
+
+            # Переход на новую строку: перемещаемся в нужную точку
+            offsetX = 0
+            offsetY -= lineSpacing
+            gcodeLettersArray.append(f"\nG0 X0 Y{offsetY}")  # Переход к началу новой строки
+            gcodeLettersArray.append("\nG0 Z0")  # Опускаем ось Z сразу после перемещения
+
+    # Поднимем ось Z после завершения печати всего текста
+    gcodeLettersArray.append("\nG0 Z10")  # Поднятие Z после завершения печати
+
+    return "".join(gcodeLettersArray)
+
+
+
+
 
 
 def parseArgs(namespace):
@@ -92,11 +121,11 @@ def parseArgs(namespace):
 		help="Directory containing the gcode information for all used characters")
 
 	argParser.add_argument_group("Text options")
-	argParser.add_argument("-l", "--line-length", type=float, default = 300,
+	argParser.add_argument("-l", "--line-length", type=float, default = 150,
 		help="Maximum length of a line")
-	argParser.add_argument("-s", "--line-spacing", type=float, default=8.0,
+	argParser.add_argument("-s", "--line-spacing", type=float, default=5,
 		help="Distance between two subsequent lines")
-	argParser.add_argument("-p", "--padding", type=float, default=1.5,
+	argParser.add_argument("-p", "--padding", type=float, default=0.5,
 		help="Empty space between characters")
 
 	argParser.parse_args(namespace=namespace)
