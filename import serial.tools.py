@@ -6,13 +6,12 @@ for p in ports:
     print(p)
 ser = serial.Serial('COM4', 9600)
 file = open("out.gcode", "r")
-ser.write(b"\r\n\r\n")
-time.sleep(1)
 while True:
     content = str.encode(file.readline())
     ser.write(content)
     time.sleep(1)
     if not content:
-        break
+      break
 file.close()
+print(ser.read)  
 ser.close
