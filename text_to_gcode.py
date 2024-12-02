@@ -87,7 +87,7 @@ def textToGcode(letters, text, lineLength, lineSpacing, padding):
     gcodeLettersArray = []
 
     # Опускаем ось Z на 0 в начале печати
-    gcodeLettersArray.append("G0 Z0")  # Опускание Z в начале
+    gcodeLettersArray.append("G0 Z0\n")  # Опускание Z в начале
 
     offsetX, offsetY = 0, 0
     for char in text:
