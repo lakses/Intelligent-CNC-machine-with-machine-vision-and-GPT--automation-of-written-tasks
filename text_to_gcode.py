@@ -118,26 +118,27 @@ def textToGcode(letters, text, lineLength, lineSpacing, padding):
     return "".join(gcodeLettersArray)
 
 def parseArgs(namespace):
-    argParser = argparse.ArgumentParser(fromfile_prefix_chars="@",
-        description="Compiles text into 2D gcode for plotters")
-
-    argParser.add_argument_group("Data options")
-    argParser.add_argument("-i", "--input", type=argparse.FileType('r', encoding="utf-8"), default="input.txt", metavar="FILE",
-        help="File to read characters from")
-    argParser.add_argument("-o", "--output", type=argparse.FileType('w', encoding="utf-8"), metavar="FILE", default="out.gcode",
-        help="File in which to save the gcode result")
-    argParser.add_argument("-g", "--gcode-directory", type=str, default="./ascii_gcode/", metavar="DIR",
-        help="Directory containing the gcode information for all used characters")
-
-    argParser.add_argument_group("Text options")
-    argParser.add_argument("-l", "--line-length", type=float, default = 130,
-        help="Maximum length of a line")
-    argParser.add_argument("-s", "--line-spacing", type=float, default= 8,
-        help="Distance between two subsequent lines")
-    argParser.add_argument("-p", "--padding", type=float, default=1,
-        help="Empty space between characters")
-
-    argParser.parse_args(namespace=namespace)
+    # Определяем директорию текущего скрипта
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Путь к папке ascii_gcode
+    gcode_directory = os.path.join(script_dir, "ascii_gcode")
+    
+    # Проверка наличия папки, если она не существует, выводим сообщение об ошибке
+    if not os.path.exists(gcode_directory):
+        print(f"Ошибка: Папка {gcode_directory} не найдена.")
+        exit(1)  # Завершаем выполнение программы с ошибкой
+    
+    # Заполняем namespace значениями по умолчанию
+    input_file = os.path.join(script_dir, "input.txt")
+    output_file = os.path.join(script_dir, "out.gcode")
+    
+    namespace.input = open(input_file, 'r', encoding='utf-8')
+    namespace.output = open(output_file, 'w', encoding='utf-8')
+    namespace.gcode_directory = gcode_directory  # Устанавливаем найденную папку
+    namespace.line_length = 120
+    namespace.line_spacing = 8
+    namespace.padding = 1
 
 def main():
     class Args: pass
@@ -147,6 +148,11 @@ def main():
     data = Args.input.read()
     gcode = textToGcode(letters, data, Args.line_length, Args.line_spacing, Args.padding)
     Args.output.write(gcode)
+
+    # Закрываем файлы после записи
+    print('ez')
+    Args.input.close()
+    Args.output.close()
 
 if __name__ == '__main__':
     main()
