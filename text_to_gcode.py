@@ -2,6 +2,7 @@ import os
 import math
 import argparse
 from enum import Enum
+import time
 
 class Instr:
     class Type(Enum):
@@ -113,7 +114,7 @@ def textToGcode(letters, text, lineLength, lineSpacing, padding):
             gcodeLettersArray.append("\nG0 Z0")  # Опускаем ось Z сразу после перемещения
 
     # Поднимем ось Z после завершения печати всего текста
-    gcodeLettersArray.append("\nG0 Z10")  # Поднятие Z после завершения печати
+    gcodeLettersArray.append("G0 Z10")  # Поднятие Z после завершения печати
 
     return "".join(gcodeLettersArray)
 
@@ -127,6 +128,7 @@ def parseArgs(namespace):
     # Проверка наличия папки, если она не существует, выводим сообщение об ошибке
     if not os.path.exists(gcode_directory):
         print(f"Ошибка: Папка {gcode_directory} не найдена.")
+        time.sleep(10)
         exit(1)  # Завершаем выполнение программы с ошибкой
     
     # Заполняем namespace значениями по умолчанию
@@ -150,7 +152,6 @@ def main():
     Args.output.write(gcode)
 
     # Закрываем файлы после записи
-    print('ez')
     Args.input.close()
     Args.output.close()
 
