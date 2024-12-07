@@ -86,19 +86,21 @@ def readLetters(directory):
 def textToGcode(letters, text, lineLength, lineSpacing, padding):
     # используем для быстрой конкатенации строк
     gcodeLettersArray = []
-
+    gcodeLettersArray.append("G0 Z10\n")
     # Опускаем ось Z на 0 в начале печати
-    gcodeLettersArray.append("G0 Z0\n")  # Опускание Z в начале
-
+    # Опускание Z в начале
+    a = False
     offsetX, offsetY = 0, 0
     for char in text:
+        if(a):
+            gcodeLettersArray.append("G0 Z0\n")
         # Если встречаем пробел, поднимем ось Z
         if char == " ":
             gcodeLettersArray.append("G0 Z10 ")  # Поднятие Z (вверх)
 
         letter = letters[char].translated(offsetX, offsetY)
         gcodeLettersArray.append(repr(letter))
-
+        a = True
         # Если был пробел, опустим ось Z
         if char == " ":
             gcodeLettersArray.append("G0 Z0")  # Опускание Z (вниз)
@@ -139,8 +141,8 @@ def parseArgs(namespace):
     namespace.output = open(output_file, 'w', encoding='utf-8')
     namespace.gcode_directory = gcode_directory  # Устанавливаем найденную папку
     namespace.line_length = 120
-    namespace.line_spacing = 8
-    namespace.padding = 1
+    namespace.line_spacing = 9
+    namespace.padding = 1.5
 
 def main():
     class Args: pass
