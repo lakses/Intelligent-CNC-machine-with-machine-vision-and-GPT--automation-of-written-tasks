@@ -3,7 +3,7 @@ import math
 import argparse
 from enum import Enum
 import time
-
+a = False
 class Instr:
     class Type(Enum):
         move = 0,
@@ -24,6 +24,7 @@ class Instr:
         return "G%d X%.2f Y%.2f" % (self.type.value[0], self.x, self.y)
 
     def translated(self, x, y):
+        a = True
         return Instr(self.type, self.x + x, self.y + y + 100)
 
 class Letter:
@@ -100,7 +101,6 @@ def textToGcode(letters, text, lineLength, lineSpacing, padding):
 
         letter = letters[char].translated(offsetX, offsetY)
         gcodeLettersArray.append(repr(letter))
-        a = True
         # Если был пробел, опустим ось Z
         if char == " ":
             gcodeLettersArray.append("G0 Z0")  # Опускание Z (вниз)
